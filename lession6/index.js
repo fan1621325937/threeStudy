@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import Stats from "three/addons/libs/stats.module.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
-import { TrackballControls } from "three/addons/controls/TrackballControls.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 // let scene, camera, renderer
 
 //1. 创建场景
@@ -11,11 +11,7 @@ let boxGeometry = new THREE.BoxGeometry(100, 100, 100);
 //修改
 
 //3.创建材质
-let material = new THREE.MeshBasicMaterial({
-  color: 0x00ff00,
-  transparent: true, //开启透明
-  opacity: 0.5, //设置透明度
-});
+let material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
 //4. 根据几何体和材质创建物体 =>网格
 let mesh = new THREE.Mesh(boxGeometry, material);
 mesh.position.set(0, 0, 0);
@@ -30,9 +26,9 @@ scene.add(mesh);
 // far 远裁剪面距离相机的距离
 let width = 1000;
 let height = 1000;
-let camera = new THREE.PerspectiveCamera(90, width / height, 0.1, 1000);
+let camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 3000);
 //7. 设置相机的位置
-camera.position.set(0, 0, 1000);
+camera.position.set(600, 600, 600);
 //8. 相机观察目标点
 camera.lookAt(0, 0, 0); //观察固定点
 // camera.lookAt(mesh.position); //观察物体
@@ -49,5 +45,33 @@ document.body.appendChild(render.domElement);
 //12. 添加坐标轴辅助器
 let axesHelper = new THREE.AxesHelper(1000);
 scene.add(axesHelper);
-//13. 渲染场景
+
+//13.添加光源
+
+// const light = new THREE.PointLight(0xffffff);
+// light.position.set(-200, 200, -202);
+// light.distance = 0;
+// light.decay = 1.5;
+// light.intensity = 1000;
+// scene.add(light);
+
+// 14.环境光
+
+// const ambientLight = new THREE.AmbientLight(0xffffff);
+// scene.add(ambientLight);
+
+//15.平行光
+let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(-200, 300, -202);
+scene.add(directionalLight);
+
+
+//16.可视化点光源
+let pointLightHelper = new THREE.PointLightHelper(directionalLight, 100);
+scene.add(pointLightHelper);
 render.render(scene, camera);
+//添加轨道控制器
+let controls = new OrbitControls(camera, render.domElement);
+controls.addEventListener("change", function () {
+  render.render(scene, camera);
+});
