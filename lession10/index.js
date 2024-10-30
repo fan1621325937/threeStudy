@@ -2,22 +2,38 @@ import * as THREE from "three";
 import Stats from "three/addons/libs/stats.module.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
 // let scene, camera, renderer
 
 //1. 创建场景
 let scene = new THREE.Scene();
 //2. 创建几何体
-let boxGeometry = new THREE.BoxGeometry(100, 100, 100);
+let boxGeometry = new THREE.BoxGeometry(10, 10, 10);
 //修改
 
 //3.创建材质
-let material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+let material = new THREE.MeshLambertMaterial({
+  color: 0xffff,
+  transparent: true,
+  opacity: 0.6,
+  side: THREE.DoubleSide,
+  });
 //4. 根据几何体和材质创建物体 =>网格
 let mesh = new THREE.Mesh(boxGeometry, material);
 mesh.position.set(0, 0, 0);
 //5. 将几何体添加到场景
 scene.add(mesh);
 
+// for (let i = 0; i < 1000; i++) {
+
+// }
+for (let i = 0; i < 10; i++) {
+  for (let j = 0; j < 10; j++) {
+    let mesh = new THREE.Mesh(boxGeometry, material);
+    mesh.position.set(i * 20, 0, j * 20);
+    scene.add(mesh);
+  }
+}
 //6. 创建一个相机
 //设置相机的四个参数
 // fieldOfView 视野角度
@@ -26,9 +42,9 @@ scene.add(mesh);
 // far 远裁剪面距离相机的距离
 let width = window.innerWidth;
 let height = window.innerHeight;
-let camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 3000);
+let camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 3000);
 //7. 设置相机的位置
-camera.position.set(600, 600, 600);
+camera.position.set(200, 200, 200);
 //8. 相机观察目标点
 camera.lookAt(0, 0, 0); //观察固定点
 // camera.lookAt(mesh.position); //观察物体
@@ -49,28 +65,41 @@ scene.add(axesHelper);
 
 //13.添加光源
 
-// const light = new THREE.PointLight(0xffffff);
-// light.position.set(-200, 200, -202);
-// light.distance = 0;
-// light.decay = 1.5;
-// light.intensity = 1000;
-// scene.add(light);
+const light = new THREE.PointLight(0xffffff);
+light.position.set(0,200,0);
+light.distance = 10000;
+light.decay = 2;
+light.intensity = 100;
+light.castShadow = true;
 
-// 14.环境光
+
+
+ 
+scene.add(light);
+
+// // 14.环境光
 
 // const ambientLight = new THREE.AmbientLight(0xffffff);
 // scene.add(ambientLight);
 
-//15.平行光
-let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(-200, 300, -202);
-scene.add(directionalLight);
+// //15.平行光
+// let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+// directionalLight.position.set(-200, 300, -202);
+// scene.add(directionalLight);
 
 //16.可视化点光源
-let pointLightHelper = new THREE.PointLightHelper(directionalLight, 100);
+let pointLightHelper = new THREE.PointLightHelper(light, 100);
 scene.add(pointLightHelper);
+
+//17.Stats 性能检测
+let stats = new Stats();
+document.body.appendChild(stats.dom);
+
 //添加轨道控制器
 let controls = new OrbitControls(camera, render.domElement);
+controls.target.set(0, 0, 0);
+controls.update();
+
 let clock = new THREE.Clock(); //时间
 function animate() {
   // let time = clock.getElapsedTime(); //获取当前时间
@@ -81,6 +110,7 @@ function animate() {
   mesh.rotation.y += 0.01;
   requestAnimationFrame(animate);
   render.render(scene, camera);
+  stats.update();
 }
 animate();
 

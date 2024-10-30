@@ -2,20 +2,25 @@ import * as THREE from "three";
 import Stats from "three/addons/libs/stats.module.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
 // let scene, camera, renderer
 
 //1. 创建场景
 let scene = new THREE.Scene();
 //2. 创建几何体
-let boxGeometry = new THREE.BoxGeometry(100, 100, 100);
-//修改
+// let boxGeometry = new THREE.BoxGeometry(10, 10, 10);
 
+const boxGeometry = new THREE.BoxGeometry( 100, 100, 100 ); 
 //3.创建材质
-let material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+let material = new THREE.MeshPhongMaterial({
+  color: 0xff0000,
+  shininess: 20, //光泽度
+  specular: 0xffffff, //材质的高光颜色
+});
 //4. 根据几何体和材质创建物体 =>网格
 let mesh = new THREE.Mesh(boxGeometry, material);
 mesh.position.set(0, 0, 0);
-//5. 将几何体添加到场景
+// 5. 将几何体添加到场景
 scene.add(mesh);
 
 //6. 创建一个相机
@@ -26,61 +31,63 @@ scene.add(mesh);
 // far 远裁剪面距离相机的距离
 let width = window.innerWidth;
 let height = window.innerHeight;
-let camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 3000);
+let camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 3000);
 //7. 设置相机的位置
-camera.position.set(600, 600, 600);
+camera.position.set(100, 100, 100);
 //8. 相机观察目标点
 camera.lookAt(0, 0, 0); //观察固定点
 // camera.lookAt(mesh.position); //观察物体
 
 //9. 创建渲染器
-let render = new THREE.WebGLRenderer();
+let render = new THREE.WebGLRenderer({
+  antialias: true, //开启反锯齿
+});
 
 //10. 设置渲染器的尺寸
 render.setSize(width, height);
 
 //11. 把渲染器添加到页面
 
+render.setPixelRatio(window.devicePixelRatio); //设置设备像素比
+render.setClearColor(0x00ff00, 1);
 document.body.appendChild(render.domElement);
+
 
 //12. 添加坐标轴辅助器
 let axesHelper = new THREE.AxesHelper(1000);
 scene.add(axesHelper);
 
-//13.添加光源
-
-// const light = new THREE.PointLight(0xffffff);
-// light.position.set(-200, 200, -202);
-// light.distance = 0;
-// light.decay = 1.5;
-// light.intensity = 1000;
-// scene.add(light);
-
-// 14.环境光
-
-// const ambientLight = new THREE.AmbientLight(0xffffff);
-// scene.add(ambientLight);
-
-//15.平行光
+//13.平行光
 let directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(-200, 300, -202);
+directionalLight.intensity = 20;
+
+directionalLight.position.set(200, 300, 202);
 scene.add(directionalLight);
 
-//16.可视化点光源
+// 14.可视化点光源
 let pointLightHelper = new THREE.PointLightHelper(directionalLight, 100);
 scene.add(pointLightHelper);
+
+//15.Stats 性能检测
+let stats = new Stats();
+document.body.appendChild(stats.dom);
+
 //添加轨道控制器
 let controls = new OrbitControls(camera, render.domElement);
+controls.target.set(0, 0, 0);
+controls.update();
+
 let clock = new THREE.Clock(); //时间
 function animate() {
   // let time = clock.getElapsedTime(); //获取当前时间
   let time = clock.getDelta() * 1000; //获取时间差
-  console.log(time);
+  // console.log(time);
 
   // mesh.rotation.x += 0.01;
   mesh.rotation.y += 0.01;
   requestAnimationFrame(animate);
   render.render(scene, camera);
+  stats.update();
 }
 animate();
 
@@ -92,3 +99,7 @@ window.addEventListener("resize", function () {
   camera.updateProjectionMatrix();
   render.setSize(width, height);
 });
+
+
+//打印屏幕像素比
+console.log(window.devicePixelRatio ,'devicePixelRatio')
